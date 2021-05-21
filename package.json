@@ -1,0 +1,23 @@
+{
+  "name": "despit",
+  "version": "0.0.1",
+  "description": "Platform for single use chat rooms",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ApocalypseCalculator/despit.git"
+  },
+  "author": "ApocalypseCalculator",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ApocalypseCalculator/despit/issues"
+  },
+  "homepage": "https://github.com/ApocalypseCalculator/despit#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.1.2"
+  }
+}
