@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
                     socket.broadcast.to(socket.id).emit('error', "Invalid token for socket");
                 }
                 else {
-                    let room = socketMap.get(socket.id);
+                    let room = socketMap.get(socket.id).room;
                     roomMap.get(room).forEach(id => {
                         io.sockets.to(id).emit('message', { user: `${user.name}`, msg: content.msg });
                     });
@@ -59,12 +59,15 @@ io.on("connection", (socket) => {
                 let newroom = roomMap.get(obj.room);
                 newroom.push(socket.id);
                 roomMap.set(obj.room, newroom);
-                socketMap.set(socket.id, obj.room);
+                socketMap.set(socket.id, { room: obj.room, name: obj.name });
+                roomMap.get(obj.room).forEach(id => {
+                    io.sockets.to(id).emit('join', `${obj.name}`);
+                });
             }
             else {
                 if (/^[A-Za-z0-9]+$/.test(obj.room)) {
                     roomMap.set(obj.room, [socket.id]);
-                    socketMap.set(socket.id, obj.room);
+                    socketMap.set(socket.id, { room: obj.room, name: obj.name });
                     roomMap.get(obj.room).forEach(id => {
                         io.sockets.to(id).emit('join', `${obj.name}`);
                     });
@@ -80,14 +83,14 @@ io.on("connection", (socket) => {
     })
     socket.on('disconnect', () => {
         if (socketMap.has(socket.id)) {
-            let temp = roomMap.get(socketMap.get(socket.id)).filter(id => id !== socket.id);
+            let temp = roomMap.get(socketMap.get(socket.id).room).filter(id => id !== socket.id);
             if (temp.length == 0) {
-                roomMap.delete(socketMap.get(socket.id));
+                roomMap.delete(socketMap.get(socket.id).room);
             }
             else {
-                roomMap.set(socketMap.get(socket.id), temp);
-                roomMap.get(socketMap.get(socket.id)).forEach(id => {
-                    io.sockets.to(id).emit('leave', `A user disconnected`);
+                roomMap.set(socketMap.get(socket.id).room, temp);
+                roomMap.get(socketMap.get(socket.id).room).forEach(id => {
+                    io.sockets.to(id).emit('leave', `${socketMap.get(socket.id).name}`);
                 });
             }
             socketMap.delete(socket.id);
