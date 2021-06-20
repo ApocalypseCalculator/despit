@@ -30,20 +30,52 @@ app.get('/', (req, res) => {
 });
 
 io.on("connection", (socket) => {
-    /*socket.on('message', (msg) => {
-        io.emit('message', msg);
-    });*/
+    socket.on('message', (content) => {
+        if (content.token && content.msg) {
+            jwt.verify(content.token, config.TOKEN_SECRET, (err, user) => {
+                if (err) {
+                    socket.broadcast.to(socket.id).emit('error', "JWT verification error");
+                }
+                else if (user.socket !== socket.id) {
+                    socket.broadcast.to(socket.id).emit('error', "Invalid token for socket");
+                }
+                else {
+                    let room = socketMap.get(socket.id);
+                    roomMap.get(room).forEach(id => {
+                        io.sockets.to(id).emit('message', { user: `${user.name}`, msg: content.msg });
+                    });
+                }
+            })
+        }
+        else {
+            io.sockets.to(socket.id).emit('error', "No token or message");
+        }
+    });
     socket.on('setname', (obj) => {
         if (obj.room && obj.name) {
             let token = jwt.sign({ name: obj.name, socket: socket.id }, config.TOKEN_SECRET);
-            socket.broadcast.to(socket.id).emit('jwt', { token: token });
+            io.sockets.to(socket.id).emit('jwt', token);
             if (roomMap.has(obj.room)) {
-                roomMap.set(obj.room, roomMap.get(obj.room).push(socket.id));
+                let newroom = roomMap.get(obj.room);
+                newroom.push(socket.id);
+                roomMap.set(obj.room, newroom);
                 socketMap.set(socket.id, obj.room);
             }
             else {
-                //create new room here
+                if (/^[A-Za-z0-9]+$/.test(obj.room)) {
+                    roomMap.set(obj.room, [socket.id]);
+                    socketMap.set(socket.id, obj.room);
+                    roomMap.get(obj.room).forEach(id => {
+                        io.sockets.to(id).emit('join', `${obj.name}`);
+                    });
+                }
+                else {
+                    io.sockets.to(socket.id).emit('error', "Invalid room code");
+                }
             }
+        }
+        else {
+            io.sockets.to(socket.id).emit('error', "Missing room code or name");
         }
     })
     socket.on('disconnect', () => {
@@ -54,6 +86,9 @@ io.on("connection", (socket) => {
             }
             else {
                 roomMap.set(socketMap.get(socket.id), temp);
+                roomMap.get(socketMap.get(socket.id)).forEach(id => {
+                    io.sockets.to(id).emit('leave', `A user disconnected`);
+                });
             }
             socketMap.delete(socket.id);
         }
