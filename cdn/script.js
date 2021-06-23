@@ -5,7 +5,7 @@ var form = document.getElementById('form');
 var setname = document.getElementById('setname');
 var input = document.getElementById('input');
 
-input.value = "Enter in the information at the top first";
+input.value = "Enter in the information in the overlay form first";
 
 setname.addEventListener('submit', function (e) {
   e.preventDefault();
