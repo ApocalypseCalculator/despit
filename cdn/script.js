@@ -25,18 +25,22 @@ form.addEventListener('submit', function (e) {
 });
 
 socket.on('message', function (msg) {
+  msg.msg = escapeHtml(msg.msg);
+  msg.user = escapeHtml(msg.user);
   var item = document.createElement('li');
   item.innerHTML = `<b>${msg.user}:</b> ${msg.msg}`;
   messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
 });
 socket.on('join', function (msg) {
+  msg = escapeHtml(msg);
   var item = document.createElement('li');
   item.innerHTML = `<b>[system]:</b> A user <b>${msg}</b> joined the chat room`;
   messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
 });
 socket.on('leave', function (msg) {
+  msg = escapeHtml(msg);
   var item = document.createElement('li');
   item.innerHTML = `<b>[system]</b>: A user <b>${msg}</b> has left the chat`;
   messages.appendChild(item);
@@ -55,3 +59,7 @@ socket.on('jwt', function (msg) {
   document.getElementById("overlay").style.display = "none";
   setname.remove();
 });
+
+function escapeHtml(unsafe) {
+  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
