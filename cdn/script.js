@@ -52,5 +52,6 @@ socket.on('jwt', function (msg) {
   jwt = msg;
   input.disabled = false;
   input.value = '';
+  document.getElementById("overlay").style.display = "none";
   setname.remove();
 });
