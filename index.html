@@ -8,13 +8,19 @@
 
 <body>
   <ul id="messages"></ul>
-  <form action="" id="setname">
-    <label for="name">Name</label>
-    <input id="name" autocomplete="off" />
-    <label for="roomid">Room Id</label>
-    <input id="roomid" autocomplete="off" />
-    <button>Submit</button>
-  </form>
+  <div id="overlay">
+    <div id="entryform">
+      <form action="" id="setname">
+        <label for="name">Name</label>
+        <input class="entryforminp" id="name" autocomplete="off" required />
+
+        <label for="roomid">Room Id</label>
+        <input class="entryforminp" id="roomid" autocomplete="off" required />
+
+        <button id="entryformsub">Submit</button>
+      </form>
+    </div>
+  </div>
   <form id="form" action="">
     <input id="input" placeholder="Enter message here" autocomplete="off" disabled /><button>Send</button>
   </form>
